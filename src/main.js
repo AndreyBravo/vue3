@@ -10,6 +10,7 @@ import directives from "@/directives";
 const app = createApp(App);
 
 components.forEach((component) => {
+  
   app.component(component.name, component);
 });
 
