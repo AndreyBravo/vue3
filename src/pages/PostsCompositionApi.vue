@@ -1,30 +1,16 @@
 <template>
   <div>
     <h1>Site at posts</h1>
-    <my-input
-      :model-value="searchQuery"
-      @update:model-value="changeSearchQuery"
-      placeholder="Search..."
-    />
+    <my-input v-model="searchQuery" placeholder="Search..." />
     <div class="app__btns">
       <my-button @click="showDialog">Add post</my-button>
-      <my-select
-        :options="sortOptions"
-        :model-value="selectedSort"
-        @update:model-value="selectedSorted"
-      />
+      <my-select :options="sortOptions" v-model="selectedSort" />
     </div>
     <my-dialog v-model:show="dialogVisible">
-      <post-form @create="submit" />
+      <post-form />
     </my-dialog>
-    <post-list
-      v-if="!isPostsLoading"
-      @remove="removePost"
-      :posts="sortedAndSearchedPosts"
-    />
+    <post-list v-if="!isPostsLoading" :posts="sortedAndSearchedPosts" />
     <h1 v-else>Loading posts...</h1>
-    <!-- <pagination @change-page="changePage" :page="page" :totalPage="totalPage" /> -->
-    <div v-intersection='loadMorePosts' class="observer"></div>
   </div>
 </template>
 <script>
@@ -32,7 +18,7 @@ import PostForm from "@/components/PostForm.vue";
 import PostList from "@/components/PostList.vue";
 import Pagination from "@/components/Pagination.vue";
 
-import { mapGetters, mapActions, mapState, mapMutations } from "vuex";
+import { usePosts, useSortedPosts, useSortedAndSearchedPosts } from "@/hooks";
 
 export default {
   components: {
@@ -43,52 +29,27 @@ export default {
   data() {
     return {
       dialogVisible: false,
+      sortOptions: [
+        { value: "title", name: "On name" },
+        { value: "body", name: "On description" },
+      ],
     };
   },
-  computed: {
-    ...mapGetters({
-      posts: "getPosts",
-      sortedAndSearchedPosts: "sortedAndSearchedPosts",
-      sortOptions: "getSortOptions",
-      isPostsLoading: "getIsPostsLoading",
-      searchQuery:'getSearchQuery',
-      selectedSort:'getSelectedSort',
-    }),
-  },
-  methods: {
-    ...mapActions({
-      loadMorePosts: "GET_MOREPOSTS",
-      fetchPosts: "GET_POSTS",
-    }),
-    ...mapMutations({
-      deletePost: "SET_POSTS",
-      selectedSorted: "SET_SELETEDSORTD",
-      changeSearchQuery: "SET_SEARCHQUERY",
-    }),
-    submit(title, description) {
-      this.posts.push({
-        id: Date.now(),
-        title: title,
-        body: description,
-      });
-      this.title = "";
-      this.description = "";
-      this.dialogVisible = false;
-    },
-    removePost(post) {
-      this.deletePost(this.posts.filter((item) => item.id !== post.id));
-    },
-    showDialog() {
-      this.dialogVisible = true;
-    },
-  },
-  mounted() {
-    this.fetchPosts();
-  },
-  watch: {
-    // page() {
-    //   this.fetchPosts();
-    // }
+  setup(props) {
+    const { posts, totalPage, isPostsLoading } = usePosts(10);
+    const { sortPosts, selectedSort } = useSortedPosts(posts);
+    const { sortedAndSearchedPosts, searchQuery } =
+      useSortedAndSearchedPosts(sortPosts);
+
+    return {
+      posts,
+      totalPage,
+      isPostsLoading,
+      sortPosts,
+      selectedSort,
+      sortedAndSearchedPosts,
+      searchQuery,
+    };
   },
 };
 </script>

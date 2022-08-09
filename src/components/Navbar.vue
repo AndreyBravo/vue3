@@ -4,13 +4,13 @@
     <div class="navbar__btns">
       <my-button @click="$router.push('/')"> Main</my-button>
       <my-button style="margin-left: 15px" @click="$router.push('/posts')">
-        composition Api</my-button
+        posts</my-button
       >
       <my-button
         style="margin-left: 15px"
         @click="$router.push('/composition')"
       >
-        Posts</my-button
+        composition Api</my-button
       >
     </div>
   </div>
